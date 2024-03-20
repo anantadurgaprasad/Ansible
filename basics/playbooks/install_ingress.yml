@@ -1,0 +1,26 @@
+---
+- name: Setup Web Server
+  hosts: webserver
+  gather_facts: false
+  become: yes
+  tasks:
+    - name: Install docker
+      ansible.builtin.yum:
+        name: docker
+        state: present
+    - name: Download docker-compose binary
+      shell: "wget https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)"
+      args:
+        chdir: /tmp  # Specify the directory where the download should occur
+
+    - name: Move docker-compose binary to /usr/local/bin
+      shell: "sudo mv docker-compose-$(uname -s)-$(uname -m) /usr/local/bin/docker-compose"
+      args:
+        chdir: /tmp  # Specify the directory where the download occurred
+
+    - name: Make docker-compose binary executable
+      shell: "sudo chmod -v +x /usr/local/bin/docker-compose"
+    - name: Start docker engine
+      shell: "sudo systemctl enable docker.service"    
+    - name: Enable docker engine
+      shell: "sudo systemctl start docker.service"
